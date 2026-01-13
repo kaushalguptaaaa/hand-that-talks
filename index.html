@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestureTalk - Hands that Speak</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js"
+        crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #ffffff;
+            --accent-primary: #00f3ff;
+            --accent-secondary: #bc13fe;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .dot {
+            color: var(--accent-primary);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Hero */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        .cta-button {
+            text-decoration: none;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            color: #000;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: transform 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .section.dark {
+            background: #0a0a0a;
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--card-bg);
+            /* subtle underline */
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Demo */
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            min-height: 500px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            /* aspect-ratio: 16/9; */
+            height: 480px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            /* Mirror effect */
+        }
+
+        #output_canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            /* Match mirror */
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--accent-primary);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        .invisible {
+            display: none;
+        }
+
+        .highlight {
+            color: var(--accent-primary);
+        }
+
+        /* Pipeline */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .step {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 250px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .step:hover {
+            transform: translateY(-10px);
+            border: 1px solid var(--accent-primary);
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: var(--accent-secondary);
+        }
+
+        /* Impact */
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card h3 {
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            padding: 2rem;
+            text-align: center;
+            opacity: 0.5;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .pipeline {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">GestureTalk<span class="dot">.</span></div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#demo">Live Demo</a></li>
+            <li><a href="#how-it-works">Technology</a></li>
+            <li><a href="#impact">Impact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="hero">
+        <div class="video-bg">
+            <!-- Placeholder for hero video -->
+            <video autoplay muted loop playsinline poster="poster.jpg">
+                <source src="hero_demo.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="hero-content">
+            <h1>GestureTalk</h1>
+            <p class="tagline">Hands that Speak</p>
+            <a href="#demo" class="cta-button">Watch Demo</a>
+        </div>
+    </header>
+
+    <!-- Demo Section -->
+    <section id="demo" class="section">
+        <h2>Live Demo</h2>
+        <div class="demo-container">
+            <div id="loading" class="loading-overlay">Loading AI Model...</div>
+            <div class="video-wrapper">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="output_canvas"></canvas>
+            </div>
+            <button id="webcamButton" class="cta-button" disabled>ENABLE WEBCAM</button>
+            <div class="captions">
+                <p>Status: <strong id="statusText">Waiting for camera...</strong></p>
+                <p>Gesture: <span class="highlight" id="gestureOutput">None</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section dark">
+        <h2>How It Works</h2>
+        <div class="pipeline">
+            <div class="step">
+                <div class="icon">📷</div>
+                <h3>Camera Input</h3>
+                <p>Captures video via Browser (getUserMedia).</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+                <div class="icon">🖐️</div>
+                <h3>Gesture Recognition</h3>
+                <p>MediaPipe AI tracks hand landmarks in real-time.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+                <div class="icon">🗣️</div>
+                <h3>Text-to-Speech</h3>
+                <p>Converts mapped gestures to audio instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact -->
+    <section id="impact" class="section">
+        <h2>Impact & Accessibility</h2>
+        <div class="impact-grid">
+            <div class="card">
+                <h3>🏥 Hospitals</h3>
+                <p>Enables motionless patients to signal nurses.</p>
+            </div>
+            <div class="card">
+                <h3>🏫 Classrooms</h3>
+                <p>Silent communication tool for inclusion.</p>
+            </div>
+            <div class="card">
+                <h3>🚨 Emergency</h3>
+                <p>Rapid signaling when speech is impossible.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 GestureTalk Team. Built in 24 hours.</p>
+    </footer>
+
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('CRITICAL ERROR:\n\nCamera and AI features will NOT work when opening the file directly.\n\nPlease run "run_demo.bat" to start the local server.');
+            document.body.innerHTML = '<h1 style="color:white; padding: 2rem;">Error: Please use run_demo.bat</h1><p style="color:ccc; padding: 0 2rem;">Browsers block camera access from local files for security.</p>';
+        }
+    </script>
+
+    <script type="module">
+        import {
+            FilesetResolver,
+            HandLandmarker,
+            DrawingUtils
+        } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest";
+
+        const demosSection = document.getElementById("demo");
+        const video = document.getElementById("webcam");
+        const canvasElement = document.getElementById("output_canvas");
+        const canvasCtx = canvasElement.getContext("2d");
+        const enableWebcamButton = document.getElementById("webcamButton");
+        const statusText = document.getElementById("statusText");
+        const gestureOutput = document.getElementById("gestureOutput");
+        const loadingOverlay = document.getElementById("loading");
+
+        let handLandmarker = undefined;
+        let webcamRunning = false;
+        let lastVideoTime = -1;
+        let results = undefined;
+        let lastSpoken = "";
+        let lastGesture = "";
+        let stableCount = 0;
+
+        // Initialize HandLandmarker
+        const createHandLandmarker = async () => {
+            try {
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+                );
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 1
+                });
+                demosSection.classList.remove("invisible");
+                loadingOverlay.style.display = "none";
+                enableWebcamButton.disabled = false;
+                enableWebcamButton.innerText = "ENABLE WEBCAM";
+            } catch (e) {
+                console.error(e);
+                statusText.innerText = "Model error: " + e + ". Camera still available.";
+                // Allow camera anyway
+                enableWebcamButton.disabled = false;
+                enableWebcamButton.innerText = "ENABLE WEBCAM (NO AI)";
+            }
+        };
+
+        createHandLandmarker();
+
+        // Check Webcam support
+        const hasGetUserMedia = () => { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); };
+
+        if (hasGetUserMedia()) {
+            enableWebcamButton.addEventListener("click", enableCam);
+        } else {
+            console.warn("getUserMedia() is not supported by your browser");
+            statusText.innerText = "Webcam not supported";
+        }
+
+        function enableCam(event) {
+            if (webcamRunning === true) {
+                webcamRunning = false;
+                enableWebcamButton.innerText = "ENABLE WEBCAM";
+                statusText.innerText = "Webcam stopped";
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            } else {
+                webcamRunning = true;
+                enableWebcamButton.innerText = "DISABLE WEBCAM";
+                statusText.innerText = "Starting camera...";
+
+                const constraints = { video: true };
+
+                navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+                    video.srcObject = stream;
+                    video.addEventListener("loadeddata", predictWebcam);
+                    statusText.innerText = "Tracking Active";
+                });
+            }
+        }
+
+        async function predictWebcam() {
+            canvasElement.style.width = video.videoWidth;
+            canvasElement.style.height = video.videoHeight;
+            canvasElement.width = video.videoWidth;
+            canvasElement.height = video.videoHeight;
+
+            if (webcamRunning === true) {
+                let startTimeMs = performance.now();
+                if (handLandmarker && lastVideoTime !== video.currentTime) {
+                    lastVideoTime = video.currentTime;
+                    results = handLandmarker.detectForVideo(video, startTimeMs);
+                }
+
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+                let gesture = "None";
+
+                if (results && results.landmarks) {
+                    for (const landmarks of results.landmarks) {
+                        drawConnectors(canvasCtx, landmarks, HandLandmarker.HAND_CONNECTIONS, {
+                            color: "#00f3ff",
+                            lineWidth: 3
+                        });
+                        drawLandmarks(canvasCtx, landmarks, { color: "#bc13fe", lineWidth: 2 });
+
+                        gesture = recognizeGesture(landmarks);
+                    }
+                }
+
+                handleDebounce(gesture);
+
+                canvasCtx.restore();
+
+                if (webcamRunning === true) {
+                    window.requestAnimationFrame(predictWebcam);
+                }
+            }
+        }
+
+        // Simple drawing helpers if DrawingUtils fails or for custom style
+        function drawConnectors(ctx, landmarks, connections, style) {
+            ctx.strokeStyle = style.color;
+            ctx.lineWidth = style.lineWidth;
+
+            for (const connection of connections) {
+                const start = landmarks[connection[0]];
+                const end = landmarks[connection[1]];
+                if (start && end) {
+                    ctx.beginPath();
+                    ctx.moveTo(start.x * ctx.canvas.width, start.y * ctx.canvas.height);
+                    ctx.lineTo(end.x * ctx.canvas.width, end.y * ctx.canvas.height);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function drawLandmarks(ctx, landmarks, style) {
+            ctx.fillStyle = style.color;
+            for (const landmark of landmarks) {
+                ctx.beginPath();
+                ctx.arc(landmark.x * ctx.canvas.width, landmark.y * ctx.canvas.height, style.lineWidth, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+
+        function recognizeGesture(landmarks) {
+            // MediaPipe Hand Landmarks:
+            // 0: Wrist
+            // 4: Thumb Tip
+            // 8: Index Tip
+            // 12: Middle Tip
+            // 16: Ring Tip
+            // 20: Pinky Tip
+
+            // Check extended fingers
+            // Tip y < PID y (Note: Y coords are normalized 0-1, 0 is top)
+            // So if tip.y < pip.y, finger is UP.
+
+            const isFingerUp = (tipIdx, pipIdx) => {
+                return landmarks[tipIdx].y < landmarks[pipIdx].y;
+            };
+
+            // Thumb is tricky (x-axis movement). Let's ignore thumb for count or use X.
+            // Thumb Tip (4) < Thumb IP (3) usually means extended if hand is vertical?
+            // Let's rely on 4 other fingers first.
+
+            let indexUp = isFingerUp(8, 6);
+            let middleUp = isFingerUp(12, 10);
+            let ringUp = isFingerUp(16, 14);
+            let pinkyUp = isFingerUp(20, 18);
+
+            let extendedCount = (indexUp ? 1 : 0) + (middleUp ? 1 : 0) + (ringUp ? 1 : 0) + (pinkyUp ? 1 : 0);
+
+            // Simple Mapping
+            if (extendedCount === 0) return "Yes"; // Fist
+            if (extendedCount === 4 || extendedCount === 5) return "Stop"; // Open Palm (ignoring thumb check)
+            if (extendedCount === 1 && indexUp) return "Help"; // Pointing
+
+            // "Okay" - Thumb and Index touching?
+            // dist(4, 8) is small.
+            const dist = Math.hypot(landmarks[4].x - landmarks[8].x, landmarks[4].y - landmarks[8].y);
+            if (dist < 0.05 && middleUp && ringUp && pinkyUp) {
+                return "Okay";
+            }
+
+            return "None";
+        }
+
+        function handleDebounce(currentGesture) {
+            if (currentGesture === "None") {
+                gestureOutput.innerText = "...";
+                return;
+            }
+
+            if (currentGesture === lastGesture) {
+                stableCount++;
+                if (stableCount > 10) { // Approx 300ms at 30fps
+                    if (lastSpoken !== currentGesture) {
+                        speak(currentGesture);
+                        lastSpoken = currentGesture;
+                        gestureOutput.innerText = currentGesture;
+
+                        // Visual feedback
+                        gestureOutput.style.transform = "scale(1.5)";
+                        setTimeout(() => gestureOutput.style.transform = "scale(1)", 200);
+                    }
+                }
+            } else {
+                lastGesture = currentGesture;
+                stableCount = 0;
+            }
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Scroll animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        });
+
+        document.querySelectorAll('.step, .card').forEach((el) => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        document.addEventListener('scroll', () => {
+            document.querySelectorAll('.step, .card').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 100) {
+                    el.style.opacity = 1;
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
