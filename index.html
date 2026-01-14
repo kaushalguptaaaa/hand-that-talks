@@ -358,6 +358,7 @@
         <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
             <li><a href="#mission">Mission</a></li>
+            <li><a href="#future-vision">Future Vision</a></li>
             <li><a href="#demo">Try It</a></li>
             <li><a href="#impact">Impact</a></li>
         </ul>
@@ -396,6 +397,77 @@
             <div class="card">
                 <h3>Empowerment</h3>
                 <p>Giving autonomy back to those who rely on non-verbal communication.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Future Vision -->
+    <section id="future-vision" class="section dark">
+        <h2>Future Vision</h2>
+        <p class="lead">Beyond software: The next evolution of seamless communication.</p>
+
+        <div class="demo-container"
+            style="background: linear-gradient(135deg, rgba(0, 243, 255, 0.05), rgba(188, 19, 254, 0.05)); border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-wrap: wrap; gap: 3rem; padding: 2rem;">
+                <!-- Left Column: Hand That Talks -->
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="icon" style="font-size: 4rem; margin-bottom: 0;">🧤</div>
+                        <h3
+                            style="font-size: 2.5rem; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0;">
+                            Hand That Talks</h3>
+                    </div>
+
+                    <p style="font-size: 1.1rem; line-height: 1.8; opacity: 0.9;">
+                        <strong>Hand That Talks</strong> introduces a dedicated external gesture-sensing device — a
+                        compact,
+                        smart hardware module designed specifically to understand hand movements and sign language.
+                    </p>
+
+                    <div class="impact-grid" style="width: 100%; margin-top: 1rem; grid-template-columns: 1fr;">
+                        <div class="card" style="padding: 1.5rem;">
+                            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                                <div class="icon" style="font-size: 2rem; margin-bottom: 0;">👁️</div>
+                                <div>
+                                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Smart Vision</h3>
+                                    <p style="font-size: 0.95rem;">Instead of relying on a laptop or phone camera, our
+                                        device continuously captures precise hand
+                                        gestures using an optimized vision sensor and motion tracking.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="padding: 1.5rem;">
+                            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                                <div class="icon" style="font-size: 2rem; margin-bottom: 0;">⚡</div>
+                                <div>
+                                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Instant Translation</h3>
+                                    <p style="font-size: 0.95rem;">This data is transmitted to our software system,
+                                        where it is instantly converted into text,
+                                        speech, or predefined actions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Marketing Strategy -->
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="card"
+                        style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent-primary); height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center;">
+                        <div
+                            style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--accent-primary); filter: blur(80px); opacity: 0.2; border-radius: 50%;">
+                        </div>
+
+                        <div class="icon" style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                        <h3 style="color: white; margin-bottom: 1.5rem;">Marketing Strategy</h3>
+                        <p style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.8);">
+                            Today, our goal for the website is to position this prototype as a <strong>strategic
+                                marketing asset</strong>—one that demonstrates its real-world potential, helps users
+                            understand its value, and serves as a foundation for scaling the prototype into a practical,
+                            user-focused solution.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -557,6 +629,12 @@
                     video.srcObject = stream;
                     video.addEventListener("loadeddata", predictWebcam);
                     statusText.innerText = "Tracking Active";
+                }).catch((err) => {
+                    console.error("Error accessing webcam: " + err);
+                    statusText.innerText = "Camera Error: " + err.name;
+                    alert("Could not access camera: " + err.name + "\n\nPlease ensure you are using 'run_demo.bat' and have granted permissions.");
+                    webcamRunning = false;
+                    enableWebcamButton.innerText = "ENABLE WEBCAM";
                 });
             }
         }
@@ -729,6 +807,11 @@
             const dist = Math.hypot(landmarks[4].x - landmarks[8].x, landmarks[4].y - landmarks[8].y);
             if (dist < 0.05 && middleUp && ringUp && pinkyUp) {
                 return "Okay";
+            }
+
+            // "Love" - Peace Sign (Index + Middle)
+            if (extendedCount === 2 && indexUp && middleUp) {
+                return "Love";
             }
 
             return "None";
