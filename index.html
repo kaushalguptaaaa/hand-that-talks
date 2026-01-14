@@ -113,7 +113,9 @@
         h1 {
             font-size: 5rem;
             font-weight: 900;
-            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -138,6 +140,35 @@
 
         .cta-button:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-primary);
+        }
+
+        .cta-button {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 243, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 243, 255, 0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: 200% center;
+            }
         }
 
         /* Sections */
@@ -152,11 +183,22 @@
 
         h2 {
             font-size: 3rem;
-            margin-bottom: 3rem;
-            border-bottom: 2px solid var(--card-bg);
-            /* subtle underline */
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, #fff, #aaa, #fff);
+            background-size: 200% auto;
+            animation: shimmer 5s linear infinite;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: inline-block;
-            padding-bottom: 0.5rem;
+        }
+
+        p.lead {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 3rem auto;
+            opacity: 0.8;
+            font-weight: 300;
         }
 
         /* Demo */
@@ -278,6 +320,14 @@
             margin-bottom: 1rem;
         }
 
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-primary);
+            transition: all 0.3s ease;
+        }
+
         footer {
             padding: 2rem;
             text-align: center;
@@ -307,8 +357,8 @@
         <div class="logo">GestureTalk<span class="dot">.</span></div>
         <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
-            <li><a href="#demo">Live Demo</a></li>
-            <li><a href="#how-it-works">Technology</a></li>
+            <li><a href="#mission">Mission</a></li>
+            <li><a href="#demo">Try It</a></li>
             <li><a href="#impact">Impact</a></li>
         </ul>
     </nav>
@@ -316,20 +366,42 @@
     <!-- Hero Section -->
     <header id="hero" class="hero">
         <div class="video-bg">
-            <!-- Placeholder for hero video -->
             <video autoplay muted loop playsinline poster="poster.jpg">
                 <source src="hero_demo.mp4" type="video/mp4">
             </video>
+            <div class="overlay-gradient"></div>
         </div>
         <div class="hero-content">
-            <h1>GestureTalk</h1>
-            <p class="tagline">Hands that Speak</p>
-            <a href="#demo" class="cta-button">Watch Demo</a>
+            <h1>Where Every Gesture Finds a Voice</h1>
+            <p class="tagline">Understanding beyond sound. Because communication is more than words.</p>
+            <a href="#demo" class="cta-button">Start Speaking</a>
         </div>
     </header>
 
+    <!-- Mission / About Us -->
+    <section id="mission" class="section">
+        <h2>Our Vision</h2>
+        <p class="lead">We believe connection is a fundamental human right. Our mission is to bridge the gap between
+            silence and sound, ensuring that every hand is heard and every thought is understood.</p>
+
+        <div class="impact-grid">
+            <div class="card">
+                <h3>Compassion</h3>
+                <p>Technology tailored to human needs, respecting the unique language of gestures.</p>
+            </div>
+            <div class="card">
+                <h3>Inclusion</h3>
+                <p>Removing barriers so everyone can participate in the conversation equally.</p>
+            </div>
+            <div class="card">
+                <h3>Empowerment</h3>
+                <p>Giving autonomy back to those who rely on non-verbal communication.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Demo Section -->
-    <section id="demo" class="section">
+    <section id="demo" class="section dark">
         <h2>Live Demo</h2>
         <div class="demo-container">
             <div id="loading" class="loading-overlay">Loading AI Model...</div>
@@ -371,19 +443,23 @@
 
     <!-- Impact -->
     <section id="impact" class="section">
-        <h2>Impact & Accessibility</h2>
+        <h2>Hands Speak. We Listen.</h2>
+        <p class="lead">Designed for real lives, from hospitals to classrooms.</p>
         <div class="impact-grid">
             <div class="card">
-                <h3>🏥 Hospitals</h3>
-                <p>Enables motionless patients to signal nurses.</p>
+                <div class="icon">🏥</div>
+                <h3>Healing Connections</h3>
+                <p>Helping patients communicate pain and needs when words fail.</p>
             </div>
             <div class="card">
-                <h3>🏫 Classrooms</h3>
-                <p>Silent communication tool for inclusion.</p>
+                <div class="icon">🏫</div>
+                <h3>Inclusive Learning</h3>
+                <p>Ensuring every student has a voice in the classroom, regardless of ability.</p>
             </div>
             <div class="card">
-                <h3>🚨 Emergency</h3>
-                <p>Rapid signaling when speech is impossible.</p>
+                <div class="icon">❤️</div>
+                <h3>Daily Dignity</h3>
+                <p>Simple interactions—asking for help, saying yes—restored with dignity.</p>
             </div>
         </div>
     </section>
@@ -512,6 +588,9 @@
                         drawLandmarks(canvasCtx, landmarks, { color: "#bc13fe", lineWidth: 2 });
 
                         gesture = recognizeGesture(landmarks);
+
+                        // Draw gesture text on screen
+                        drawGestureText(canvasCtx, landmarks, gesture);
                     }
                 }
 
@@ -523,6 +602,39 @@
                     window.requestAnimationFrame(predictWebcam);
                 }
             }
+        }
+
+        function drawGestureText(ctx, landmarks, text) {
+            if (text === "None") return;
+
+            // Find top-most point (min Y)
+            let minY = 1.0;
+            let minX = 1.0;
+            let maxX = 0.0;
+
+            for (const lm of landmarks) {
+                if (lm.y < minY) minY = lm.y;
+                if (lm.x < minX) minX = lm.x;
+                if (lm.x > maxX) maxX = lm.x;
+            }
+
+            const x = ((minX + maxX) / 2) * ctx.canvas.width; // Center X
+            const y = (minY * ctx.canvas.height) - 20; // Above hand
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(-1, 1); // Flip text back to be readable on mirrored canvas
+
+            ctx.font = "bold 40px 'Inter', sans-serif";
+            ctx.fillStyle = "#00f3ff";
+            ctx.strokeStyle = "rgba(0,0,0,0.8)";
+            ctx.lineWidth = 4;
+            ctx.textAlign = "center";
+
+            ctx.strokeText(text, 0, 0);
+            ctx.fillText(text, 0, 0);
+
+            ctx.restore();
         }
 
         // Simple drawing helpers if DrawingUtils fails or for custom style
@@ -552,26 +664,17 @@
         }
 
 
+        let lastWristX = -1;
+        let waveScore = 0;
+
         function recognizeGesture(landmarks) {
             // MediaPipe Hand Landmarks:
-            // 0: Wrist
-            // 4: Thumb Tip
-            // 8: Index Tip
-            // 12: Middle Tip
-            // 16: Ring Tip
-            // 20: Pinky Tip
-
-            // Check extended fingers
-            // Tip y < PID y (Note: Y coords are normalized 0-1, 0 is top)
-            // So if tip.y < pip.y, finger is UP.
+            // 0: Wrist, 4: Thumb Tip, 8: Index Tip, 12: Middle Tip, 16: Ring Tip, 20: Pinky Tip
 
             const isFingerUp = (tipIdx, pipIdx) => {
+                // Y increases downwards. Tip Y < Pip Y means UP.
                 return landmarks[tipIdx].y < landmarks[pipIdx].y;
             };
-
-            // Thumb is tricky (x-axis movement). Let's ignore thumb for count or use X.
-            // Thumb Tip (4) < Thumb IP (3) usually means extended if hand is vertical?
-            // Let's rely on 4 other fingers first.
 
             let indexUp = isFingerUp(8, 6);
             let middleUp = isFingerUp(12, 10);
@@ -580,13 +683,49 @@
 
             let extendedCount = (indexUp ? 1 : 0) + (middleUp ? 1 : 0) + (ringUp ? 1 : 0) + (pinkyUp ? 1 : 0);
 
-            // Simple Mapping
+            // --- THUMB DOWN LOGIC ---
+            // Fingers curled (extendedCount 0 or 1), Thumb Tip BELOW Wrist (y > y)
+            // Normalized Y: 1.0 is bottom.
+            if (extendedCount <= 1) {
+                let thumbTip = landmarks[4];
+                let wrist = landmarks[0];
+                let thumbIp = landmarks[3];
+
+                // Check if thumb is pointing down (Tip Y > IP Y)
+                if (thumbTip.y > thumbIp.y && thumbTip.y > wrist.y) {
+                    return "No";
+                }
+            }
+
+            // --- WAVE (HELLO) LOGIC ---
+            // Must be Open Palm (4 or 5 fingers)
+            if (extendedCount >= 4) {
+                // Track lateral movement of wrist
+                let currentWristX = landmarks[0].x;
+                if (lastWristX !== -1) {
+                    let delta = Math.abs(currentWristX - lastWristX);
+                    if (delta > 0.02) { // Sensitivity threshold
+                        waveScore += 1;
+                    } else {
+                        waveScore = Math.max(0, waveScore - 1); // Decay
+                    }
+                }
+                lastWristX = currentWristX;
+
+                if (waveScore > 5) { // Sustained movement
+                    return "Hello"; // Waves trigger Hello
+                }
+                return "Stop"; // Static Palm triggers Stop
+            } else {
+                // Reset wave if not palm
+                waveScore = 0;
+            }
+
+            // --- OTHER GESTURES ---
             if (extendedCount === 0) return "Yes"; // Fist
-            if (extendedCount === 4 || extendedCount === 5) return "Stop"; // Open Palm (ignoring thumb check)
             if (extendedCount === 1 && indexUp) return "Help"; // Pointing
 
             // "Okay" - Thumb and Index touching?
-            // dist(4, 8) is small.
             const dist = Math.hypot(landmarks[4].x - landmarks[8].x, landmarks[4].y - landmarks[8].y);
             if (dist < 0.05 && middleUp && ringUp && pinkyUp) {
                 return "Okay";
